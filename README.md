@@ -10,6 +10,12 @@ https://coderdusk.com/tools/transfer-file-by-base64/
 ## 代码仓库 ##
 https://github.com/CoderDusk/transfer-file-by-base64
 
+## 截图 ##
+
+![上传.png][1]
+
+![下载.png][2]
+
 ## 使用方法 ##
 
 ### 运行 ###
@@ -26,3 +32,7 @@ https://github.com/CoderDusk/transfer-file-by-base64
 
 ### 文件大小限制 ###
 理论上来说本工具的文件大小限制就是系统、浏览器、剪切板的长度限制，但是实际使用中文件过大很容易造成网页应用崩溃，经过多次实践发现3M左右是比较合适的单文件大小，如果有更大的文件可以分卷压缩后传输
+
+
+  [1]: https://coderdusk.com/usr/uploads/2022/08/2614898452.png
+  [2]: https://coderdusk.com/usr/uploads/2022/08/197829214.png
