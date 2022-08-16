@@ -149,6 +149,12 @@
           <div id="base64-result">
             <span class="placeholder-text">上传结果</span>
           </div>
+
+          <div class="usage">
+            使用说明：
+            <p></p>
+            理论上来说本工具的文件大小限制就是系统、浏览器、剪切板的长度限制，但是实际使用中文件过大很容易造成网页应用崩溃，经过多次实践发现3M左右是比较合适的单文件大小，如果有更大的文件可以分卷压缩后传输
+          </div>
         </div>
         <div id="base64-to-file" style="display: none">
           <input
@@ -222,6 +228,7 @@
           uploadResult = fileReader.result;
           document.getElementById("base64-result").innerHTML =
             fileReader.result;
+          copyResult();
         };
       };
       function dataURLtoFile(dataurl, filename) {
@@ -296,8 +303,6 @@
           }
         }
       }
-
-      document.getElementById("show-download-file-page-button").click();
     </script>
   </body>
 </html>
