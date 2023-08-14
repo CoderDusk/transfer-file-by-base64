@@ -92,11 +92,11 @@
 
       .download-button-area {
         display: flex;
-        justify-content: center;
+        justify-content: space-around;
+        margin: 10px 0;
       }
 
       #download-button {
-        width: 120px;
         display: flex;
         justify-content: center;
       }
@@ -168,16 +168,9 @@
             >
               下载
             </div>
-          </div>
-          <div class="usage">
-            使用说明：
-            <p></p>
-            1.如果输入完整的文件名，下载的文件就以输入的文件名为准
-            <p></p>
-            2.如果只输入了文件名没有文件类型后缀，会根据BASE64中的文件类型信息尽可能自动添加后缀
-            <p></p>
-            3.如果不输入文件名，文件名将会是
-            "下载文件"+当前时间戳，文件后缀会根据BASE64中的文件类型信息尽可能自动添加后缀
+            <div onclick="copyResult()" class="action-button copy-button">
+              清空
+            </div>
           </div>
         </div>
       </div>
