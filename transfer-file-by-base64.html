@@ -155,18 +155,18 @@
           </div>
         </div>
         <div id="base64-to-file" style="display: none">
-          <input
+          <!-- <input
             class="filename-input"
             type="text"
             id="file-name"
             placeholder="请输入文件名"
-          />
+          /> -->
           <textarea
             name=""
             id="download-file-base64"
             cols="30"
             rows="10"
-            placeholder="请将文件base64编码粘贴在这里"
+            placeholder="请将文件上传结果粘贴在这里"
           ></textarea>
           <div class="download-button-area">
             <div
@@ -220,27 +220,19 @@
       }
 
       document.getElementById("upload-file-input").onchange = function () {
+        const filename = this.files[0].name;
         var fileReader = new FileReader();
         fileReader.readAsDataURL(this.files[0]);
         fileReader.onload = function () {
           uploadResult = fileReader.result;
-          document.getElementById("base64-result").innerHTML =
-            fileReader.result;
+          const result = JSON.stringify({
+            dataurl: fileReader.result,
+            filename,
+          });
+          document.getElementById("base64-result").innerHTML = result;
           copyResult();
         };
       };
-      function dataURLtoFile(dataurl, filename) {
-        //将base64转换为文件
-        var arr = dataurl.split(","),
-          mime = arr[0].match(/:(.*?);/)[1],
-          bstr = atob(arr[1]),
-          n = bstr.length,
-          u8arr = new Uint8Array(n);
-        while (n--) {
-          u8arr[n] = bstr.charCodeAt(n);
-        }
-        return new File([u8arr], filename, { type: mime });
-      }
 
       function dataURLtoBlob(dataurl) {
         var arr = dataurl.split(","),
@@ -265,15 +257,12 @@
       }
 
       function downloadFileByBase64() {
-        let base64 = document.getElementById("download-file-base64").value;
-        if (base64.trim() === "") return alert("请先粘贴文件的BASE64编码");
-        let fileName = document.getElementById("file-name").value;
-        if (fileName.trim() == "") {
-          fileName = "下载文件" + new Date().valueOf();
-        }
-        var myBlob = dataURLtoBlob(base64);
+        let data = document.getElementById("download-file-base64").value;
+        if (data.trim() === "") return alert("请先粘贴文件的BASE64编码");
+        const { filename, dataurl } = JSON.parse(data);
+        var myBlob = dataURLtoBlob(dataurl);
         var myUrl = URL.createObjectURL(myBlob);
-        downloadFile(myUrl, fileName);
+        downloadFile(myUrl, filename);
       }
 
       function copyResult() {
