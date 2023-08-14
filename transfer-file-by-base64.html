@@ -47,13 +47,11 @@
         padding: 7px 16px;
         border-radius: 20px;
         cursor: pointer;
-        /* margin-right: 20px; */
         user-select: none;
       }
 
       .copy-button {
         background-color: rgb(236, 245, 255);
-        /* opacity: 0.6; */
         color: #409eff;
         border: #409eff 1px solid;
       }
@@ -155,12 +153,6 @@
           </div>
         </div>
         <div id="base64-to-file" style="display: none">
-          <!-- <input
-            class="filename-input"
-            type="text"
-            id="file-name"
-            placeholder="请输入文件名"
-          /> -->
           <textarea
             name=""
             id="download-file-base64"
@@ -191,7 +183,8 @@
       </div>
     </div>
     <script>
-      var uploadResult = "";
+      let uploadResult = "";
+      let myUrl = "";
 
       function showUploadFile() {
         document.getElementById("file-to-base64").style.display = "block";
@@ -224,12 +217,11 @@
         var fileReader = new FileReader();
         fileReader.readAsDataURL(this.files[0]);
         fileReader.onload = function () {
-          uploadResult = fileReader.result;
-          const result = JSON.stringify({
+          uploadResult = JSON.stringify({
             dataurl: fileReader.result,
             filename,
           });
-          document.getElementById("base64-result").innerHTML = result;
+          document.getElementById("base64-result").innerHTML = uploadResult;
           copyResult();
         };
       };
@@ -261,8 +253,9 @@
         if (data.trim() === "") return alert("请先粘贴文件的BASE64编码");
         const { filename, dataurl } = JSON.parse(data);
         var myBlob = dataURLtoBlob(dataurl);
-        var myUrl = URL.createObjectURL(myBlob);
+        myUrl = URL.createObjectURL(myBlob);
         downloadFile(myUrl, filename);
+        window.URL.revokeObjectURL(myUrl);
       }
 
       function copyResult() {
