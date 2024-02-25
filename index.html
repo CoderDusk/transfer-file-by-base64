@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>用剪切板和BASE64传输文件</title>
+    <style>
+      * {
+        padding: 0;
+        margin: 0;
+      }
+      .container {
+        width: 400px;
+        margin: 0 auto;
+      }
+      .nav {
+        display: flex;
+        justify-content: space-around;
+        border-bottom: 1px solid #dcdfe6;
+      }
+
+      .nav-item {
+        color: #1989fa;
+        opacity: 0.5;
+        padding: 15px 10px;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .active {
+        opacity: 1;
+        border-bottom: #1989fa 3px solid;
+        font-weight: bold;
+      }
+
+      .upload-file-button-group {
+        display: flex;
+        justify-content: space-between;
+        margin: 20px 0;
+      }
+
+      .action-button {
+        display: inline-block;
+        background-color: #409eff;
+        color: white;
+        padding: 7px 16px;
+        border-radius: 20px;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .copy-button {
+        background-color: rgb(236, 245, 255);
+        color: #409eff;
+        border: #409eff 1px solid;
+      }
+
+      #base64-result {
+        border: 3px solid rgb(192, 189, 189);
+        height: 200px;
+        word-wrap: break-word;
+        overflow: auto;
+      }
+
+      .placeholder-text {
+        color: rgb(192, 189, 189);
+        margin-top: 20px;
+      }
+
+      .filename-input,
+      #download-file-base64 {
+        outline-style: none;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        padding: 6px;
+        font-size: 14px;
+        width: 100%;
+        margin: 10px 0;
+        box-sizing: border-box;
+      }
+
+      .filename-input:focus,
+      #download-file-base64:focus {
+        border-color: #66afe9;
+        outline: 0;
+        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075),
+          0 0 8px rgba(102, 175, 233, 0.6);
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075),
+          0 0 8px rgba(102, 175, 233, 0.6);
+      }
+
+      .download-button-area {
+        display: flex;
+        justify-content: space-around;
+        margin: 10px 0;
+      }
+
+      #download-button {
+        display: flex;
+        justify-content: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="nav">
+        <div
+          id="show-upload-file-page-button"
+          class="nav-item active"
+          onclick="showUploadFile()"
+        >
+          上传文件
+        </div>
+        <div
+          id="show-download-file-page-button"
+          class="nav-item"
+          onclick="showDownloadFile()"
+        >
+          下载文件
+        </div>
+      </div>
+      <!-- <hr /> -->
+      <div class="operation-area">
+        <div id="file-to-base64">
+          <div class="upload-file-button-group">
+            <div
+              class="action-button choose-file-button"
+              onclick="handleUploadFileButtonClick()"
+            >
+              选择文件
+            </div>
+            <div onclick="copyResult()" class="action-button copy-button">
+              复制结果
+            </div>
+          </div>
+
+          <input
+            type="file"
+            name=""
+            id="upload-file-input"
+            style="display: none"
+          />
+          <!-- <h3>上传结果</h3> -->
+          <div id="base64-result">
+            <span class="placeholder-text">上传结果</span>
+          </div>
+
+          <div class="usage">
+            使用说明：
+            <p></p>
+            理论上来说本工具的文件大小限制就是系统、浏览器、剪切板的长度限制，但是实际使用中文件过大很容易造成网页应用崩溃，经过多次实践发现3M左右是比较合适的单文件大小，如果有更大的文件可以分卷压缩后传输
+          </div>
+        </div>
+        <div id="base64-to-file" style="display: none">
+          <textarea
+            name=""
+            id="download-file-base64"
+            cols="30"
+            rows="10"
+            placeholder="请将文件上传结果粘贴在这里"
+          ></textarea>
+          <div class="download-button-area">
+            <div
+              onclick="downloadFileByBase64()"
+              id="download-button"
+              class="action-button"
+            >
+              下载
+            </div>
+            <div onclick="copyResult()" class="action-button copy-button">
+              清空
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      let uploadResult = "";
+      let myUrl = "";
+
+      function showUploadFile() {
+        document.getElementById("file-to-base64").style.display = "block";
+        document.getElementById("base64-to-file").style.display = "none";
+        document
+          .getElementById("show-upload-file-page-button")
+          .classList.add("active");
+        document
+          .getElementById("show-download-file-page-button")
+          .classList.remove("active");
+      }
+
+      function showDownloadFile() {
+        document.getElementById("file-to-base64").style.display = "none";
+        document.getElementById("base64-to-file").style.display = "block";
+        document
+          .getElementById("show-upload-file-page-button")
+          .classList.remove("active");
+        document
+          .getElementById("show-download-file-page-button")
+          .classList.add("active");
+      }
+
+      function handleUploadFileButtonClick() {
+        document.getElementById("upload-file-input").click();
+      }
+
+      document.getElementById("upload-file-input").onchange = function () {
+        const filename = this.files[0].name;
+        var fileReader = new FileReader();
+        fileReader.readAsDataURL(this.files[0]);
+        fileReader.onload = function () {
+          uploadResult = JSON.stringify({
+            dataurl: fileReader.result,
+            filename,
+          });
+          document.getElementById("base64-result").innerHTML = uploadResult;
+          copyResult();
+        };
+      };
+
+      function dataURLtoBlob(dataurl) {
+        var arr = dataurl.split(","),
+          mime = arr[0].match(/:(.*?);/)[1],
+          bstr = atob(arr[1]),
+          n = bstr.length,
+          u8arr = new Uint8Array(n);
+        while (n--) {
+          u8arr[n] = bstr.charCodeAt(n);
+        }
+        return new Blob([u8arr], { type: mime });
+      }
+
+      function downloadFile(url, name) {
+        var a = document.createElement("a");
+        a.setAttribute("href", url);
+        a.setAttribute("download", name);
+        a.setAttribute("target", "_blank");
+        let clickEvent = document.createEvent("MouseEvents");
+        clickEvent.initEvent("click", true, true);
+        a.dispatchEvent(clickEvent);
+      }
+
+      function downloadFileByBase64() {
+        let data = document.getElementById("download-file-base64").value;
+        if (data.trim() === "") return alert("请先粘贴文件的BASE64编码");
+        const { filename, dataurl } = JSON.parse(data);
+        var myBlob = dataURLtoBlob(dataurl);
+        myUrl = URL.createObjectURL(myBlob);
+        downloadFile(myUrl, filename);
+        window.URL.revokeObjectURL(myUrl);
+      }
+
+      function copyResult() {
+        if (uploadResult.trim() === "") {
+          alert("请先上传文件");
+        } else {
+          if (navigator.clipboard) {
+            // clipboard api 复制
+            navigator.clipboard.writeText(uploadResult);
+          } else {
+            var textarea = document.createElement("textarea");
+            document.body.appendChild(textarea);
+            // 隐藏此输入框
+            textarea.style.position = "fixed";
+            textarea.style.clip = "rect(0 0 0 0)";
+            textarea.style.top = "10px";
+            // 赋值
+            textarea.value = uploadResult;
+            // 选中
+            textarea.select();
+            // 复制
+            document.execCommand("copy", true);
+            // 移除输入框
+            document.body.removeChild(textarea);
+          }
+        }
+      }
+    </script>
+  </body>
+</html>
